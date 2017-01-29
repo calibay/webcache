@@ -2,11 +2,9 @@
 /*jslint esversion: 6 */
 'use strict';
 
-
 var express = require('express');
 var app = express();
-var https = require('https');
-var firebase = require('firebase');
+var CacheHandler = require(process.cwd() + '/src/cacheHandler.server.js');
 var config = {
     apiKey: "AIzaSyDNfNr5gCD6GwQZgFaxpLyoMiYgoHr7ycA",
     authDomain: "webcache-7c320.firebaseapp.com",
@@ -14,42 +12,25 @@ var config = {
     storageBucket: "webcache-7c320.appspot.com",
     messagingSenderId: "955465248219"
   };
+var firebase = require('firebase');
 firebase.initializeApp(config);
+var cacheHandler = new CacheHandler(firebase);
 
-app.use(express.static('public'));
+app.use('/src', express.static(process.cwd() + '/src'));
+app.route('/api/')
+  .get(cacheHandler.getJobs);
 
-app.get('/api/new/:url*?', (req, res) => {
-  var url = req.params.url + req.params[0];
-  //root database ref
-  var dbRef = firebase.database().ref();
-  //random alphanumeric for ID
-  var newID = Math.random().toString(36).substring(7);
-  //newID will be the Object key for the new entry
-  var content = "";
-  var entryRef;
-  var newEntry = {};
-  newEntry[newID] = {status: 'caching'};
-
-  if(/http:/.exec(url)) {
-    url = url.replace('http', 'https');
-  }
-  https.get(url, (response) => {
-    dbRef.update(newEntry);
-    response.on('data', (chunk) => {
-      content += chunk;
-    });
-  }).on('error', (e) => {
-    console.log("Got error: " + e.message);
-  }).on('close', () => {
-    entryRef = firebase.database().ref(newID);
-    entryRef.update({data: content });
-    entryRef.update({'status': 'completed'});
-    entryRef.on('value', (snapshot) => {
-      res.send(snapshot.val());
-    });
+app.route('/')
+  .get((req, res) => {
+      res.sendFile(process.cwd() + '/public/index.html');
+  })
+  .post((req,res) => {
+    var html = "<a href='/'>Add another URL</a>"
+    var url = req.body.userUrl;
+    console.log(url);
+    res.send(html);
   });
-});
 
-app.listen(3004, function() {
-  console.log('Server listening on port 3004');
+app.listen(3005, function() {
+  console.log('Server listening on port 3005');
 });

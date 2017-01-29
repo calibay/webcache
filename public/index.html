@@ -6,16 +6,15 @@
     </title>
   </head>
   <body>
-    <h1 class="title">webcache api instructions</h1>
-    <p>
-      Add a new page to cache:
-      http://localhost:3004/api/new/http://www.example.com
+      <p>
+        Enter URL:
+      </p>
+      <input type="text" id="userUrl" placeholder="www.google.com" />
+      <button type="submit" id="submitButton">Submit</button>
+    </form>
+    <div id="status">
 
-      View all jobs:
-      http://localhost:3004/api/jobs/
-
-      View a single job:
-      http://localhost:3004/api/jobID
-    </p>
+    </div>
+    <script type="text/javascript" src="/src/cacheHandler.client.js"></script>
   </body>
 </html>
