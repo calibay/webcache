@@ -1,9 +1,12 @@
+'use strict';
 
 function CacheHandler(firebase) {
 
   var dbRef = firebase.database().ref();
   var https = require('https');
 
+  // Gets a single job if the request query includes a id, otherwise
+  // returns all jobs in the database
   this.getJobs = function(req, res) {
     dbRef.on('value', function (snapshot) {
       if (req.query.id === undefined) {
@@ -19,12 +22,14 @@ function CacheHandler(firebase) {
     });
   };
 
+  // Gets the url string from the query and retrieves the body.  Stores in
+  // a firebase database
   this.newJob = function(req, res) {
     var url = 'https://' + req.query.url;
     var dbRef = firebase.database().ref();
     //random alphanumeric for ID
-    var newID = Math.random().toString(36).substring(7);
     //newID will be the Object key for the new entry
+    var newID = Math.random().toString(36).substring(7);
     var content = "";
     var entryRef;
     var newEntry = {};

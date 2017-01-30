@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  var apiUrl = 'http://localhost:3005/api'
+  var apiUrl = 'http://localhost:3005/api';
   var userUrl = document.querySelector('#userUrl');
   var urlSubmitButton = document.querySelector('#urlSubmitButton');
   var idSubmitButton = document.querySelector('#idSubmitButton');
