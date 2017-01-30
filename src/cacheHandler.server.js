@@ -2,59 +2,53 @@
 function CacheHandler(firebase) {
 
   var dbRef = firebase.database().ref();
-  function ajaxRequest (method, url, callback) {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function () {
-       if (xmlhttp.readyState === 4 && xmlhttp.status === 200) {
-          callback(xmlhttp.response);
-       }
-    };
-
-    xmlhttp.open(method, url, true);
-    xmlhttp.send();
-  }
+  var https = require('https');
 
   this.getJobs = function(req, res) {
     dbRef.on('value', function (snapshot) {
-      res.send(snapshot.val());
+      if (req.query.id === undefined) {
+        res.send(snapshot.val());
+      } else {
+        var id = req.query.id;
+        if (id in snapshot.val()) {
+          res.send(snapshot.val()[id]);
+        } else {
+          res.send("ID not found");
+        }
+      }
     });
-  }
+  };
 
-  // var https = require('https');
+  this.newJob = function(req, res) {
+    var url = 'https://' + req.query.url;
+    var dbRef = firebase.database().ref();
+    //random alphanumeric for ID
+    var newID = Math.random().toString(36).substring(7);
+    //newID will be the Object key for the new entry
+    var content = "";
+    var entryRef;
+    var newEntry = {};
+    newEntry[newID] = {url: url, status: 'caching'};
 
-  // app.get('/api/new/:url*?', (req, res) => {
-  //   var url = req.params.url + req.params[0];
-  //   //root database ref
-  //   var dbRef = firebase.database().ref();
-  //   //random alphanumeric for ID
-  //   var newID = Math.random().toString(36).substring(7);
-  //   //newID will be the Object key for the new entry
-  //   var content = "";
-  //   var entryRef;
-  //   var newEntry = {};
-  //   newEntry[newID] = {status: 'caching'};
-  //
-  //   if(/http:/.exec(url)) {
-  //     url = url.replace('http', 'https');
-  //   }
-  //   https.get(url, (response) => {
-  //     dbRef.update(newEntry);
-  //     response.on('data', (chunk) => {
-  //       content += chunk;
-  //     });
-  //   }).on('error', (e) => {
-  //     console.log("Got error: " + e.message);
-  //   }).on('close', () => {
-  //     entryRef = firebase.database().ref(newID);
-  //     entryRef.update({data: content });
-  //     entryRef.update({'status': 'completed'});
-  //     entryRef.on('value', (snapshot) => {
-  //       res.send(snapshot.val());
-  //     });
-  //   });
-  // });
+    https.get(url, function(response) {
+      dbRef.update(newEntry);
+
+      response.on('data', function(chunk) {
+        content += chunk;
+      });
+    }).on('error', function(e) {
+      console.log("Got error: " + e.message);
+    }).on('close', function() {
+      entryRef = firebase.database().ref(newID);
+      entryRef.update({data: content });
+      entryRef.update({'status': 'completed'});
+      entryRef.on('value', function (snapshot) {
+        var snapshotVal = snapshot.val();
+        snapshotVal.id = newID;
+        res.send(snapshotVal);
+      });
+    });
+  };
 }
-
 
 module.exports = CacheHandler;

@@ -17,8 +17,9 @@ firebase.initializeApp(config);
 var cacheHandler = new CacheHandler(firebase);
 
 app.use('/src', express.static(process.cwd() + '/src'));
-app.route('/api/')
-  .get(cacheHandler.getJobs);
+app.route('/api')
+  .get(cacheHandler.getJobs)
+  .post(cacheHandler.newJob);
 
 app.route('/')
   .get((req, res) => {
