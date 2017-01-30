@@ -11,8 +11,12 @@ Be able to cache a website's content and save to a database for use later.
 NPM and node required.
 
 git clone https://github.com/calibay/webcache.git
+
 npm install
+
 node index.js
+
+browse to http://localhost:3004
 
 ## API Reference
 
