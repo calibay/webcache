@@ -1,5 +1,6 @@
 'use strict';
-
+// Used responding to interface button clicks.  Will respond when user submits
+// a new URL or for retrieving an ID
 (function () {
   var apiUrl = 'http://localhost:3005/api';
   var userUrl = document.querySelector('#userUrl');
